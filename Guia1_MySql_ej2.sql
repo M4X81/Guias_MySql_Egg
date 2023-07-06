@@ -44,7 +44,7 @@ obtener un diagrama de entidad relación igual al que se muestra a continuación
 A continuación, se deben realizar las siguientes consultas sobre la base de datos:
 1. Lista el nombre de todos los productos que hay en la tabla producto.*/
 
-select * from producto;
+select nombre from producto;
 
 -- 2. Lista los nombres y los precios de todos los productos de la tabla producto
 select nombre, precio from producto;
@@ -100,12 +100,14 @@ where precio between 60 and 200;
 
 -- 14. Lista todos los productos donde el código de fabricante sea 1, 3 o 5. Utilizando el operador 
 -- IN.
-select * from producto where codigo_fabricante in (1,3,5);
+select * from producto 
+where codigo_fabricante in (1,3,5);
 
 -- 15. Devuelve una lista con el nombre de todos los productos que contienen la cadena Portátil 
 -- en el nombre
 
-select * from producto where nombre like ('%portatil%');
+select * from producto 
+where nombre like ('%portatil%');
 
 /*Consultas Multitabla 
 1. Devuelve una lista con el código del producto, nombre del producto, código del fabricante 

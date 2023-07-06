@@ -192,6 +192,12 @@ WHERE e.id_depto = d.id_depto
 GROUP BY d.nombre_depto
 HAVING COUNT(e.nombre) =0 or COUNT(e.nombre) = null; 
 
+/*27. Mostrar la lista de empleados, con su respectivo departamento y el jefe de cada 
+departamento*/
+select d.nombre_depto, d.nombre_jefe_depto, e.nombre
+from empleados e,departamentos d
+where e.id_depto = d.id_depto;
+
 /*Consulta con Subconsulta 
 28. Mostrar la lista de los empleados cuyo salario es mayor o igual que el promedio de la
 empresa. Ordenarlo por departamento.

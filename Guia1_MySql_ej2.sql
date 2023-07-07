@@ -200,7 +200,8 @@ where precio =(select max(precio) from producto where codigo_fabricante=
 /*4. Lista todos los productos del fabricante Asus que tienen un precio superior al precio 
 medio de todos sus productos*/
 select * from producto
-where precio > (select avg(precio) from producto
+where codigo_fabricante = (select codigo from fabricante
+where nombre like 'asus') and precio > (select avg(precio) from producto
 where codigo_fabricante =(select codigo from fabricante
 where nombre like 'asus'));
 

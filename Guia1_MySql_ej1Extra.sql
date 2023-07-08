@@ -18627,3 +18627,100 @@ join estadisticas e on e.jugador = j.codigo
 group by j.Nombre
 order by j.nombre;
 
+-- 11. Mostrar el número de jugadores de cada equipo
+
+select eq.Nombre, count(*)
+from equipos eq
+join jugadores j on eq.Nombre = j.Nombre_equipo
+group by eq.Nombre
+order by eq.nombre;
+/* select count(nombre), nombre_equipo from jugadores group by Nombre_equipo;*/ 
+
+-- 12. Mostrar el jugador que más puntos ha realizado en toda su carrera.
+select j.Nombre, round(sum(e.Puntos_por_partido)) as total_puntos
+from estadisticas e 
+join jugadores j on e.jugador = j.codigo
+group by j.nombre
+order by total_puntos desc
+limit 1;
+
+-- 13. Mostrar el nombre del equipo, conferencia y división del jugador más alto de la NBA.
+select j.Nombre, eq.Nombre, eq.Conferencia, eq.Division, j.Altura
+from jugadores j
+join equipos eq on eq.Nombre = j.Nombre_equipo
+order by j.Altura desc
+limit 1;
+
+-- 14. Mostrar la media de puntos en partidos de los equipos de la división Pacific.
+
+/*select * from equipos
+where division = 'pacific';
+
+select avg(e.Puntos_por_partido)
+from estadisticas e 
+join jugadores j on  e.jugador = j.codigo
+where j.Nombre_equipo in ('Clippers','Kings','Lakers','Suns','Warriors');*/
+select avg(e.Puntos_por_partido) as promedio_puntos
+from estadisticas e
+join jugadores j on e.jugador = j.codigo
+where j.Nombre_equipo in (select Nombre_equipo from equipos where division = 'pacific'); 
+
+/*15. Mostrar el partido o partidos (equipo_local, equipo_visitante y diferencia) con mayor 
+diferencia de puntos.*/
+
+select codigo,equipo_local, equipo_visitante, abs(puntos_local - puntos_visitante) as diferencia
+from partidos
+where abs(puntos_local - puntos_visitante) = 
+(select max(abs(puntos_local - puntos_visitante))from partidos)
+order by diferencia desc;
+
+/*
+15. Mostrar el partido o partidos (equipo_local, equipo_visitante y diferencia) con mayor 
+diferencia de puntos.
+*/
+-- hecho en g61
+/*    EQUIPO_LOCAL AS "Local",
+    EQUIPO_VISITANTE AS "Visitante",
+    ABS(PUNTOS_LOCAL - PUNTOS_VISITANTE) AS "Diferencia"
+FROM
+    PARTIDOS where ABS(PUNTOS_LOCAL - PUNTOS_VISITANTE)= (SELECT max(abs(PUNTOS_LOCAL - PUNTOS_VISITANTE)) 
+FROM
+    PARTIDOS);*/
+
+-- 16. Mostrar la media de puntos en partidos de los equipos de la división Pacific.
+ -- revisar
+select avg((select sum(puntos_local) from partidos where equipo_local = e.Nombre),
+(select sum(puntos_visitante) from partidos where equipo_visitante = e.Nombre)) as promedio_puntos
+from equipos e
+join partidos p on (e.Nombre = p.equipo_local or e.Nombre = p.equipo_visitante)
+where e.nombre in (select Nombre_equipo from equipos where division = 'pacific'); 
+
+-- 17. Mostrar los puntos de cada equipo en los partidos, tanto de local como de visitante. 
+
+select e.Nombre, 
+(select sum(puntos_local) from partidos where equipo_local = e.Nombre) as total_puntos_local,
+(select sum(puntos_visitante) from partidos where equipo_visitante = e.Nombre) as total_puntos_visitante, 
+(select sum(puntos_local) from partidos where equipo_local = e.Nombre) + 
+(select sum(puntos_visitante) from partidos where equipo_visitante = e.Nombre) as total
+from equipos e;
+
+/*select count(*) from partidos
+where equipo_local = '76ers' or equipo_visitante = '76ers';*/
+-- no se si la cifra estara bien pero segun esto son 1044 partidos a un prom de 100pp estaria calculo
+
+-- 18. Mostrar quien gana en cada partido (codigo, equipo_local, equipo_visitante, 
+-- equipo_ganador), en caso de empate sera null.
+
+/*select codigo, equipo_local,equipo_visitante
+from partidos
+where ((select equipo_local from partidos where puntos_local > puntos_visitante) or
+(select equipo_visitante from partidos where puntos_visitante > puntos_local));*/
+
+
+select codigo, equipo_local, equipo_visitante,
+(select equipo_local from partidos p1
+where p1.codigo = p2.codigo and p1.puntos_local > p1.puntos_visitante) as equipo_ganador
+from partidos p2;
+/* instancio dos tablas p1 y p2 asi puedo comparar los resultados de las subconsultas como si fueran
+dos registros pero del mismo codigo(el del partido) y de ahi poder definir cual es el que tiene
+mas puntos*/

@@ -18688,13 +18688,34 @@ FROM
     PARTIDOS);*/
 
 -- 16. Mostrar la media de puntos en partidos de los equipos de la división Pacific.
- -- revisar
-select avg((select sum(puntos_local) from partidos where equipo_local = e.Nombre),
-(select sum(puntos_visitante) from partidos where equipo_visitante = e.Nombre)) as promedio_puntos
-from equipos e
-join partidos p on (e.Nombre = p.equipo_local or e.Nombre = p.equipo_visitante)
-where e.nombre in (select Nombre_equipo from equipos where division = 'pacific'); 
+/*
+select e.nombre, sum(p.puntos_local + p.puntos_visitante ) as suma_puntos, avg(p.puntos_local + p.puntos_visitante )as promedio from partidos p 
+join equipos e on (e.Nombre = p.equipo_local or e.Nombre = p.equipo_visitante)
+where division = 'pacific'
+group by e.nombre
+order by e.nombre;
+este me esta sumando los dos(los puntos del local y del visitante)
+*/
 
+select e.nombre,(select sum(p.puntos_local) from partidos p
+join equipos e on (e.nombre = p.equipo_local )) as '1', (select sum(p.puntos_visitante) from partidos p
+join equipos e on (e.nombre = p.equipo_visitante )) as '2'
+from equipos e
+where division = 'pacific'
+group by e.nombre
+order by e.nombre;
+
+/*
+select sum(p.puntos_local), count(*) from partidos p
+join equipos e on (e.nombre = p.equipo_local  )    
+where e.nombre = 'clippers'
+order by e.nombre;
+
+select sum(p.puntos_visitante), count(*)  from partidos p
+join equipos e on (e.nombre = p.equipo_visitante  )    
+where e.nombre = 'clippers'
+order by e.nombre;
+*/
 -- 17. Mostrar los puntos de cada equipo en los partidos, tanto de local como de visitante. 
 
 select e.Nombre, 

@@ -1166,71 +1166,153 @@ where  p.codigo_pedido is null;
 /*3. Devuelve un listado que muestre los clientes que no han realizado ningún pago y los que 
 no han realizado ningún pedido.*/
   
+  select c.nombre_cliente, ped.codigo_pedido,p.id_transaccion
+  from cliente c 
+  left join pedido ped on ped.codigo_cliente = c.codigo_cliente
+  left join pago p on p.codigo_cliente = c.codigo_cliente
+  where ped.codigo_pedido is null and p.id_transaccion is null;
   
 /*
 4. Devuelve un listado que muestre solamente los empleados que no tienen una oficina 
 asociada.*/
 
+select concat(nombre," ",apellido1," ",apellido2) as 'Empleado'
+from empleado
+where codigo_oficina is null;
+-- = 'PAR-FR';
 
 /*5. Devuelve un listado que muestre solamente los empleados que no tienen un cliente 
 asociado.*/
 
+select concat(e.nombre," ",e.apellido1," ",e.apellido2) as 'Empleado'
+from empleado e
+right join cliente c on c.codigo_empleado_rep_ventas = e.codigo_empleado
+where c.codigo_empleado_rep_ventas is null;
 
 /*6. Devuelve un listado que muestre los empleados que no tienen una oficina asociada y los 
 que no tienen un cliente asociado.*/
 
+select concat(e.nombre," ",e.apellido1," ",e.apellido2) as 'Empleado'
+from empleado e 
+left join oficina o on e.codigo_oficina = o.codigo_oficina
+join cliente c on e.codigo_empleado = c.codigo_empleado_rep_ventas
+where e.codigo_oficina is null and c.codigo_empleado_rep_ventas is null;
+
 
 -- 7. Devuelve un listado de los productos que nunca han aparecido en un pedido.
-
+select distinct pr.nombre
+from producto pr
+left join detalle_pedido dp on pr.codigo_producto = dp.codigo_producto
+where dp.codigo_producto is null;
 
 /*8. Devuelve las oficinas donde no trabajan ninguno de los empleados que hayan sido los 
 representantes de ventas de algún cliente que haya realizado la compra de algún producto 
 de la gama Frutales.*/
+select o.codigo_oficina, o.ciudad  
+from oficina o 
+join (select c.nombre_cliente from cliente c join detalle_pedido dp 
+on ( select dp.codigo_pedido from dp join pedido p on dp.codigo_pedido = p.codigo_pedido
+where dp.codigo_producto not like 'fr%') = p.codigo_pedido) as t1
+left join empleado e on ( e.codigo_empleado = ;
+
+select c.codigo_cliente, p.codigo_pedido
+from cliente c 
+join pedido p on (select dp.codigo_pedido, dp.codigo_producto 
+from detalle_pedido dp join pedido p on dp.codigo_pedido = p.codigo_pedido
+where dp.codigo_producto not like 'fr%') = p.codigo_pedido;
+
+
+
+/*
+select dp.codigo_pedido, dp.codigo_producto from  detalle_pedido dp join pedido p on dp.codigo_pedido = p.codigo_pedido
+where dp.codigo_producto not like 'fr%';*/
 
 
 /*9. Devuelve un listado con los clientes que han realizado algún pedido, pero no han realizado 
 ningún pago.*/
-
+select c.nombre_cliente,c.codigo_cliente, p.codigo_pedido
+from cliente c 
+join pedido p on p.codigo_cliente = c.codigo_cliente
+where not exists( select p1.codigo_cliente from pago p1 where c.codigo_cliente = p1.codigo_cliente);
 
 /*10. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el 
 nombre de su jefe asociado.*/
 
+select concat(e.nombre," ",e.apellido1," ",e.apellido2) as 'Empleado',
+	   concat(j.nombre," ",j.apellido1," ",j.apellido2) as 'Jefe'
+from empleado e
+join empleado j
+join cliente c on c.codigo_empleado_rep_ventas = e.codigo_empleado
+where c.codigo_empleado_rep_ventas is null;
 
 /*Consultas resumen
 1. ¿Cuántos empleados hay en la compañía?*/
 
+select count(*) as cantidad_empleados
+from empleado;
 
 -- 2. ¿Cuántos clientes tiene cada país?
-
+select pais, count(*) as clientes 
+from cliente
+group by pais;
 
 -- 3. ¿Cuál fue el pago medio en 2009?
 
+select round((sum(total) / count(*)),2)  as promedio
+from pago
+where year(fecha_pago) = 2009;
 
 /*4. ¿Cuántos pedidos hay en cada estado? Ordena el resultado de forma descendente por el 
 número de pedidos.*/
 
+select estado,count(*) as pedidos 
+from pedido
+group by estado
+order by pedidos desc;
 
 -- 5. Calcula el precio de venta del producto más caro y más barato en una misma consulta.
 
+select max(precio_venta) as maximo, min(precio_venta) as minimo
+from producto;
 
 -- 6. Calcula el número de clientes que tiene la empresa.
 
+select count(codigo_cliente) as clientes
+from cliente;
 
 -- 7. ¿Cuántos clientes tiene la ciudad de Madrid?
-
+select count(codigo_cliente) as clientes
+from cliente
+where ciudad ='madrid';
 
 -- 8. ¿Calcula cuántos clientes tiene cada una de las ciudades que empiezan por M?
 
+select ciudad, count(*) as clientes
+from cliente
+where ciudad like 'm%'
+group by ciudad
+order by ciudad;
 
 -- 9. Devuelve el nombre de los representantes de ventas y el número de clientes al que atiende 
 -- cada uno.
 
+select concat(e.nombre," ",e.apellido1," ",e.apellido2) as 'Empleado', count(*) as clientes
+from cliente c  
+join empleado e on e.codigo_empleado = c.codigo_empleado_rep_ventas
+group by e.codigo_empleado
+order by clientes desc;
 
 -- 10. Calcula el número de clientes que no tiene asignado representante de ventas.
 
+select nombre_cliente, count(*) as total
+from cliente
+where codigo_empleado_rep_ventas is null
+group by codigo_cliente;
 
 /*11. Calcula la fecha del primer y último pago realizado por cada uno de los clientes. El listado 
 deberá mostrar el nombre y los apellidos de cada cliente.*/
+select
+
 
 
 -- 12. Calcula el número de productos diferentes que hay en cada uno de los pedidos.
